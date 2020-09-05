@@ -1,0 +1,89 @@
+# Tomcat
+server:
+  tomcat:
+    accesslog:
+      enabled: true
+      pattern: '%t %a "%r" %s (%D ms)'
+    basedir: ../logs/
+    threads:
+      max: 10
+      min-spare: 10
+  port: 80
+# mysql
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wxmp?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    druid:
+      max-pool-prepared-statement-per-connection-size: -1
+      min-idle: 10
+      validation-query-timeout: 60
+      max-active: 20
+      test-while-idle: true
+      time-between-eviction-runs-millis: 60000
+      validation-query: select 'x'
+      use-global-data-source-stat: true
+      max-wait: 60000
+      filter:
+        config:
+          enabled: true
+        stat:
+          merge-sql: true
+          db-type: mysql
+          slow-sql-millis: 2000
+          enabled: true
+          log-slow-sql: true
+        wall:
+          db-type: mysql
+          config:
+            create-table-allow: false
+            truncate-allow: false
+            alter-table-allow: false
+            drop-table-allow: false
+            delete-allow: true
+          enabled: true
+      test-on-borrow: false
+      keep-alive: true
+      pool-prepared-statements: false
+      initial-size: 2
+      min-evictable-idle-time-millis: 300000
+      test-on-return: false
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  resources:
+    static-locations: classpath:/static/,classpath:/views/
+  cache:
+    ehcache:
+      config: classpath:property/ehcache.xml
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+# Mybatis配置
+mybatis:
+  configuration:
+    default-fetch-size: 100
+    default-statement-timeout: 30
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.wxmp.**.domain
+# Spring boot的默认log配置很好用，默认10MB一个文件，回定期归档log文件为gz
+logging:
+  level:
+    com.wxmp.wxcms.mapper: debug
+  file:
+    name: logs/wx.log
+#for nginx
+#res.upload.path = /media/data/temporary/
+
+#for nginx
+#res.upload.url = http://127.0.0.1/temporary/
+#本地测试 无nginx的情况
+#  res.upload.url = http://localhost:8080/upload/
+res:
+  upload:
+    url: http://localhost:8080/upload/

@@ -1,0 +1,178 @@
+<div class="fsh-rightPanel wxmp-index">
+    <div class="layui-anim layui-anim-upbit">
+        <div class="layui-row layui-col-space10">
+            <div class="layui-col-md6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">环境信息</div>
+                    <div class="panel-body" id="index-environment">
+                        <table class="layui-table">
+                            <colgroup>
+                                <col width="150">
+                                <col>
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <td>JAVA版本:</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>MYSQL版本</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>WEB服务器</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>CPU个数</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>虚拟机内存总量</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>虚拟机空闲内存量</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>虚拟机使用的最大内存量</td>
+                                <td></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md6">
+                <div class="panel panel-default" style="min-height: 386px;">
+                    <div class="panel-heading">系统信息</div>
+                    <div class="panel-body" id="index-stytem">
+                        <table class="layui-table">
+                            <colgroup>
+                                <col width="150">
+                                <col>
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <td>客户端IP：</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>服务器IP</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>操作系统</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>用户主目录</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>工作目录</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>系统目录</td>
+                                <td></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>更新日志</legend>
+    </fieldset>
+    <div class="layui-row layui-col-space10">
+        <div class="layui-col-md12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <ul class="layui-timeline">
+                        <li class="layui-timeline-item">
+                            <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+                            <div class="layui-timeline-content layui-text">
+                                <h3 class="layui-timeline-title">V 1.0</h3>
+                                <p>屈原的思想核心是忠君爱国 殉道精神，他有“<em>鸷鸟之不群兮，自前世而固然</em>”的高雅情操。个人最爱的名篇有：</p>
+                                <ul>
+                                    <li>《离骚》</li>
+                                    <li>《九歌》</li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<script>
+    $(function () {
+        var systemVersion = null;
+        var systemUpdateTime = null;
+        var systemName = null;
+        //获取系统环境信息
+        $.ajax({
+            type: 'GET',
+            url: '/manage/index',
+            success: function (result) {
+                if (result.success) {
+                    renderHtml({
+                        targetId: 'index-environment',
+                        template: "environment",
+                        htmlData: result,
+                    });
+                    renderHtml({
+                        targetId: 'index-stytem',
+                        template: "stytem",
+                        htmlData: result,
+                    });
+                    systemName = result.data.systemName;
+                    systemVersion = result.data.systemVersion;
+                    systemUpdateTime = result.data.systemUpdateTime;
+                    // checkUpdate();
+                }
+            }
+        });
+
+        function checkUpdate() {
+            $.getJSON("https://www.smartwx.info/newVersion?callback=?", function (result) {
+                if (systemVersion && result.LAST_SYSTEM_VERSION) {
+                    //渲染版本信息
+                    result.systemName = systemName;
+                    result.systemVersion = systemVersion;
+                    result.systemUpdateTime = systemUpdateTime;
+                    renderHtml({
+                        targetId: 'index-version',
+                        template: "version",
+                        htmlData: result,
+                    });
+                    var local = systemVersion.split(".");
+                    var last = result.LAST_SYSTEM_VERSION.split(".");
+                    if (hasnew(local[0], last[0])) {
+                        newCallback();
+                    } else if (local[0] == last[0]) {
+                        if (hasnew(local[1], last[1])) {
+                            newCallback();
+                        } else if (local[1] == last[1] && hasnew(local[2], last[2])) {
+                            newCallback();
+                        }
+                    }
+                }
+
+                function hasnew(a, b) {
+                    return parseInt(b) > parseInt(a)
+                }
+
+                function newCallback() {
+                    $("#index-update").removeClass("hide");
+                }
+            });
+        }
+    });
+</script>
